@@ -1,0 +1,70 @@
+{
+  "name": "Error workflow generico",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "450e3c03-911d-4502-a336-802de653249e",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09N4NG38F5",
+          "mode": "list",
+          "cachedResultName": "test-soporte-platzi"
+        },
+        "text": "=Error error workflow fallido:\nURL de ejecución: {{ $json.execution.url }}\n\nMensaje de error:\n{{ $json.execution.error.message }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c9d8931d-72e7-4b3b-86c3-708effcd5f2a",
+      "name": "Send a message",
+      "webhookId": "12b896dc-d2df-4f3a-a590-deb34f7380ef",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "z2NdZbtpnhBzNJ9b",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7da23826-6f63-4d2e-a0db-ff3b5301a6bf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb93d7ebc8a301ed99d10c7fb5d16f7b08b7954450dbaad005179f2a9dd88ba0"
+  },
+  "id": "d711VGvZIJp02MON",
+  "tags": []
+}

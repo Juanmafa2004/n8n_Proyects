@@ -1,0 +1,503 @@
+{
+  "name": "Asistente -interno-flujo-principal",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Esuchamos y transformamos los datos \nTan pronto se envie la petición a través de la url se capturara los datos que necesitamos en el edit fields",
+        "height": 144,
+        "width": 400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -304
+      ],
+      "typeVersion": 1,
+      "id": "8c4c4ea7-3d49-4cd6-9f3f-7dedee1176d3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c9015191-98c0-49d1-9b56-ce1b174e9d4e",
+              "leftValue": "={{ $json.mensaje }}",
+              "rightValue": "={{ $json.mensaje }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "acf1728f-31e1-43f4-8c00-5ce3082f2fd1",
+              "leftValue": "={{ $json.mensaje.length() }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        256
+      ],
+      "id": "2c03fcdf-4455-400a-8767-6524e2df3f32",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"estado\": \"error\",\n  \"detalle\": \"El mensaje esta vacio o es demasiado corto\"  \n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        544,
+        352
+      ],
+      "id": "029fc243-09ba-41a3-9554-236f1ebb7da7",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "content": "## Validamos que el campo del mensaje no este vacio.\n",
+        "width": 208,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        256,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "f7febcad-bbb4-4c6a-83b1-ec310116d3e0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Mandamos respuesta\nsi existe el campo mensaje respondera que todo salio bien sino resportara un error",
+        "height": 176,
+        "width": 256,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        496,
+        512
+      ],
+      "typeVersion": 1,
+      "id": "67e35e79-2b6b-40b6-9df2-6acccea81a4a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "asistente-interno",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        256
+      ],
+      "id": "99f53141-4d5c-4e7d-ac97-0e3682b95c69",
+      "name": "Webhook1",
+      "webhookId": "cd76d58a-65b4-45c1-8771-0165b56d30ed"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{\n(() => {\nconst origen = $json.origen\n  const editFields = $('Edit Fields1').item.json;\nconst subworkflow= $('Call \\'SubWorflow de clasificación\\'').item.json\n\n  const resultado = {\n        origen,\n    ...editFields,\n    ...subworkflow\n  };\n\n  return JSON.stringify(resultado);\n\n})()\n}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1120,
+        160
+      ],
+      "id": "042ed700-d12e-4144-a316-ef6e6f7b00fa",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0b737f9-258d-4d54-b461-2916817be9a4",
+              "name": "usuario",
+              "value": "={{ $json.body.usuario }}",
+              "type": "string"
+            },
+            {
+              "id": "c5f63a85-8e5b-4735-99d6-bdfaa388ff44",
+              "name": "mensaje",
+              "value": "={{ $json.body.mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "54a3e531-4c57-458b-af87-16a1e537fe03",
+              "name": "prioridad",
+              "value": "={{ $('Webhook1').item.json.body.mensaje.toLowerCase().includes(\"urgente\")? \"alta\":\"normal\" }}",
+              "type": "string"
+            },
+            {
+              "id": "0eaf4d13-61a9-4eaa-bc92-4e967c4bb87d",
+              "name": "fecha",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            },
+            {
+              "id": "0a6a6b38-c987-4ee4-9a15-cb877009345b",
+              "name": "flujo",
+              "value": "={{ $workflow .name}}",
+              "type": "string"
+            },
+            {
+              "id": "085e7e0b-70c0-4eae-af8b-ecae469e1862",
+              "name": "ejecucion_id",
+              "value": "={{ $execution.id}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        96,
+        256
+      ],
+      "id": "b5a40686-6434-472c-9da4-d04ef09760ef",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "zkN1SVfRyyDxadqE",
+          "mode": "id",
+          "cachedResultUrl": "/workflow/zkN1SVfRyyDxadqE"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "mensaje": "={{ $json.mensaje }}"
+          },
+          "matchingColumns": [
+            "mensaje"
+          ],
+          "schema": [
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        160
+      ],
+      "id": "2cee29d5-83e6-4138-8487-3a83a662db28",
+      "name": "Call 'SubWorflow de clasificación'"
+    },
+    {
+      "parameters": {
+        "content": "## Agregamos un  subworkflow\n\n* Agreamos en este caso el subworkflow con este id zkN1SVfRyyDxadqE",
+        "height": 208,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        480,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "e6020c15-394e-4123-8d1b-b8d978b6467f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Agregamos un switch\nLo usamos para clasificar por las categorias obtenidas en el subworkflow",
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        736,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "509daf88-c7c9-47e1-b490-58734a7007c0",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Agregamos nodos de salida\nEstos nodos dependeran de la categoria que nos mande el switch\n",
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "0e8209a5-b18e-4e90-b6fa-c22721017f08",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "Lm6geBozquG9OnG2",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/Lm6geBozquG9OnG2",
+          "cachedResultName": "sub-enrutado"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "categoria": "={{ $json.categoria }}",
+            "prioridad": "={{ $('Edit Fields1').item.json.prioridad }}",
+            "usuario": "={{ $('Edit Fields1').item.json.usuario }}",
+            "mensaje": "={{ $('Edit Fields1').item.json.mensaje }}",
+            "ejecucion_id": "={{ $('Edit Fields1').item.json.ejecucion_id }}",
+            "fecha": "={{ $('Edit Fields1').item.json.fecha }}"
+          },
+          "matchingColumns": [
+            "categoria",
+            "prioridad",
+            "usuario",
+            "mensaje",
+            "ejecucion_id",
+            "fecha"
+          ],
+          "schema": [
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "prioridad",
+              "displayName": "prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "usuario",
+              "displayName": "usuario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mensaje",
+              "displayName": "mensaje",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ejecucion_id",
+              "displayName": "ejecucion_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "fecha",
+              "displayName": "fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        752,
+        160
+      ],
+      "name": "Call sub-enrutado",
+      "id": "773f4410-447b-49db-babf-1ec27016c767"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html>\n<html lang=\"es\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\n  <title>Enviar mensaje — Asistente Interno</title>\n  <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap\" rel=\"stylesheet\">\n  <style>\n    :root{\n      --bg:#0f1724;\n      --card:#0b1220;\n      --accent:#6ee7b7;\n      --muted:#94a3b8;\n      --glass: rgba(255,255,255,0.03);\n      --success:#10b981;\n      --error:#ef4444;\n      --glass-2: rgba(255,255,255,0.02);\n    }\n    *{box-sizing:border-box}\n    html,body{height:100%}\n    body{\n      margin:0;\n      font-family: \"Inter\", system-ui, -apple-system, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial;\n      background: radial-gradient(1200px 600px at 10% 10%, rgba(110,231,183,0.06), transparent),\n                  radial-gradient(1000px 500px at 90% 90%, rgba(99,102,241,0.05), transparent),\n                  var(--bg);\n      color:#e6eef8;\n      -webkit-font-smoothing:antialiased;\n      -moz-osx-font-smoothing:grayscale;\n      display:flex;\n      align-items:center;\n      justify-content:center;\n      padding:28px;\n    }\n\n    .card{\n      width:100%;\n      max-width:880px;\n      background: linear-gradient(180deg,var(--card), rgba(7,10,16,0.85));\n      border-radius:16px;\n      box-shadow: 0 8px 30px rgba(2,6,23,0.6);\n      padding:26px;\n      display:grid;\n      grid-template-columns: 1fr 360px;\n      gap:20px;\n      backdrop-filter: blur(6px) saturate(110%);\n      border: 1px solid rgba(255,255,255,0.03);\n    }\n\n    /* left column: form */\n    .panel{\n      padding:18px;\n    }\n    h1{\n      margin:0 0 8px 0;\n      font-size:20px;\n      letter-spacing:-0.2px;\n    }\n    p.lead{\n      margin:0 0 18px 0;\n      color:var(--muted);\n      font-size:14px;\n    }\n\n    label{\n      display:block;\n      font-size:13px;\n      color:#cfe7d9;\n      margin-bottom:8px;\n      font-weight:600;\n    }\n    .input, textarea{\n      width:100%;\n      border-radius:10px;\n      padding:12px 14px;\n      background:var(--glass-2);\n      border:1px solid rgba(255,255,255,0.03);\n      color:inherit;\n      outline:none;\n      font-size:14px;\n      resize:vertical;\n      min-height:44px;\n      transition:box-shadow .18s, transform .06s;\n      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.01);\n    }\n    .input:focus, textarea:focus{\n      box-shadow: 0 6px 18px rgba(99,102,241,0.08);\n      transform: translateY(-1px);\n      border-color: rgba(99,102,241,0.35);\n    }\n    .row{display:flex;gap:12px}\n    .small{font-size:13px;color:var(--muted);margin-top:6px}\n\n    .actions{\n      margin-top:16px;\n      display:flex;\n      gap:12px;\n      align-items:center;\n    }\n    .btn{\n      border:0;\n      padding:11px 16px;\n      font-weight:700;\n      border-radius:10px;\n      cursor:pointer;\n      font-size:14px;\n      background:linear-gradient(90deg,var(--accent), #60a5fa);\n      color:#052022;\n      box-shadow: 0 8px 20px rgba(99,102,241,0.12);\n      transition:transform .12s, opacity .12s;\n    }\n    .btn:active{transform:translateY(1px)}\n    .btn.secondary{\n      background:transparent;\n      color:var(--muted);\n      border:1px solid rgba(255,255,255,0.04);\n      box-shadow:none;\n      font-weight:600;\n    }\n    .btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}\n\n    /* right column: preview / status */\n    .aside{\n      padding:18px;\n      border-left:1px dashed rgba(255,255,255,0.03);\n      display:flex;\n      flex-direction:column;\n      gap:12px;\n      align-items:stretch;\n      justify-content:flex-start;\n    }\n    .badge{\n      display:inline-flex;\n      align-items:center;\n      gap:8px;\n      padding:8px 12px;\n      border-radius:999px;\n      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));\n      color:var(--muted);\n      font-weight:600;\n      font-size:13px;\n    }\n    .preview{\n      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));\n      border-radius:10px;\n      padding:12px;\n      font-size:13px;\n      color:var(--muted);\n      min-height:120px;\n      display:flex;\n      flex-direction:column;\n      gap:8px;\n      white-space:pre-wrap;\n    }\n\n    .status{\n      margin-top:auto;\n      display:flex;\n      align-items:center;\n      gap:10px;\n      font-size:14px;\n    }\n    .dot{\n      width:12px;height:12px;border-radius:50%;\n      background:var(--muted);\n      box-shadow:0 3px 8px rgba(2,6,23,0.6);\n    }\n    .dot.sending{background:linear-gradient(180deg,var(--accent), #60a5fa)}\n    .dot.success{background:var(--success)}\n    .dot.error{background:var(--error)}\n\n    .toast{\n      padding:10px 12px;border-radius:8px;\n      font-size:13px;margin-top:8px;color:#042018;\n      display:inline-block;\n    }\n    .toast.success{background:linear-gradient(90deg,#bbf7d0,#6ee7b7)}\n    .toast.error{background:linear-gradient(90deg,#fecaca,#f87171)}\n    .muted-note{font-size:12px;color:var(--muted);margin-top:6px}\n\n    /* Responsive */\n    @media (max-width:860px){\n      .card{ grid-template-columns:1fr; padding:18px; }\n      .aside{ border-left: none; border-top:1px dashed rgba(255,255,255,0.03); padding-top:16px; }\n    }\n  </style>\n</head>\n<body>\n  <main class=\"card\" role=\"main\" aria-labelledby=\"title\">\n    <section class=\"panel\" aria-labelledby=\"title\">\n      <div style=\"display:flex;align-items:center;gap:12px;margin-bottom:12px\">\n        <div style=\"width:48px;height:48px;border-radius:12px;background:linear-gradient(180deg,#60a5fa,#6ee7b7);display:flex;align-items:center;justify-content:center;color:#042022;font-weight:800;font-size:18px\">AI</div>\n        <div>\n          <h1 id=\"title\">Enviar mensaje al Asistente Interno</h1>\n          <p class=\"lead\">Rellena los campos y envia tu mensaje. Se enviará como JSON por POST a <code>http://localhost:5678/webhook-test/asistente-interno</code>.</p>\n        </div>\n      </div>\n\n      <form id=\"messageForm\" novalidate>\n        <div style=\"margin-bottom:14px\">\n          <label for=\"user\">Usuario</label>\n          <input id=\"user\" name=\"user\" class=\"input\" type=\"text\" placeholder=\"Tu nombre o identificador (ej. juan.forero)\" required maxlength=\"80\" />\n          <div class=\"small\">Este valor se enviará como la propiedad <code>user</code> en el JSON.</div>\n        </div>\n\n        <div style=\"margin-bottom:8px\">\n          <label for=\"message\">Mensaje</label>\n          <textarea id=\"message\" name=\"message\" class=\"input\" placeholder=\"Escribe tu mensaje para el asistente...\" rows=\"6\" required maxlength=\"2000\"></textarea>\n          <div class=\"small\">Se enviará como la propiedad <code>message</code> en el JSON.</div>\n        </div>\n\n        <div class=\"actions\">\n          <button type=\"submit\" id=\"sendBtn\" class=\"btn\">Enviar mensaje</button>\n          <button type=\"button\" id=\"clearBtn\" class=\"btn secondary\">Limpiar</button>\n          <div style=\"margin-left:auto\" class=\"small muted-note\">Nota: el backend debe aceptar CORS si pruebas desde otro origen.</div>\n        </div>\n      </form>\n    </section>\n\n    <aside class=\"aside\" aria-label=\"Estado y vista previa\">\n      <div style=\"display:flex;justify-content:space-between;align-items:center\">\n        <span class=\"badge\">Webhook destino</span>\n        <small style=\"color:var(--muted);font-weight:600;font-size:13px\">http://localhost:5678</small>\n      </div>\n\n      <div>\n        <label style=\"font-weight:700;font-size:13px;margin-bottom:6px;display:block\">Vista previa del JSON</label>\n        <div id=\"preview\" class=\"preview\">// Aquí aparecerá el JSON antes de enviar</div>\n      </div>\n\n      <div id=\"statusBox\" class=\"status\" aria-live=\"polite\">\n        <div class=\"dot\" id=\"statusDot\"></div>\n        <div id=\"statusText\">Listo para enviar.</div>\n      </div>\n\n      <div id=\"toastArea\" style=\"min-height:46px\"></div>\n\n    </aside>\n  </main>\n\n  <script>\n    (function(){\n      const form = document.getElementById('messageForm');\n      const userInput = document.getElementById('user');\n      const messageInput = document.getElementById('message');\n      const preview = document.getElementById('preview');\n      const statusDot = document.getElementById('statusDot');\n      const statusText = document.getElementById('statusText');\n      const toastArea = document.getElementById('toastArea');\n      const sendBtn = document.getElementById('sendBtn');\n      const clearBtn = document.getElementById('clearBtn');\n\n      const ENDPOINT = 'http://localhost:5678/webhook-test/asistente-interno';\n\n      function updatePreview(){\n        const payload = {\n          user: userInput.value.trim() || \"<usuario_vacio>\",\n          message: messageInput.value.trim() || \"<mensaje_vacio>\"\n        };\n        preview.textContent = JSON.stringify(payload, null, 2);\n      }\n\n      function setStatus(state, text){\n        statusDot.className = 'dot ' + (state || '');\n        statusText.textContent = text || '';\n      }\n\n      function showToast(type, text){\n        toastArea.innerHTML = '';\n        const el = document.createElement('div');\n        el.className = 'toast ' + (type === 'success' ? 'success' : 'error');\n        el.textContent = text;\n        toastArea.appendChild(el);\n        // Desaparece en 6 segundos\n        setTimeout(()=>{ if (toastArea.contains(el)) toastArea.removeChild(el); }, 6000);\n      }\n\n      userInput.addEventListener('input', updatePreview);\n      messageInput.addEventListener('input', updatePreview);\n\n      clearBtn.addEventListener('click', function(){\n        userInput.value = '';\n        messageInput.value = '';\n        updatePreview();\n      });\n\n      // Inicial\n      updatePreview();\n      setStatus('', 'Listo para enviar.');\n\n      form.addEventListener('submit', async function(e){\n        e.preventDefault();\n\n        // Validaciones simples\n        if (!userInput.value.trim()){\n          userInput.focus();\n          showToast('error','Por favor ingresa el nombre de usuario.');\n          return;\n        }\n        if (!messageInput.value.trim()){\n          messageInput.focus();\n          showToast('error','Por favor escribe un mensaje.');\n          return;\n        }\n\n        const payload = {\n          user: userInput.value.trim(),\n          message: messageInput.value.trim()\n        };\n\n        // UI -> enviando\n        sendBtn.disabled = true;\n        sendBtn.textContent = 'Enviando...';\n        setStatus('sending', 'Enviando mensaje...');\n        updatePreview();\n\n        try {\n          const res = await fetch(ENDPOINT, {\n            method: 'POST',\n            headers: { 'Content-Type': 'application/json' },\n            body: JSON.stringify(payload)\n          });\n\n          // intenta leer body (si lo hay)\n          let textBody = '';\n          try { textBody = await res.text(); } catch(_) { textBody = ''; }\n\n          if (!res.ok) {\n            // Error HTTP\n            setStatus('error', 'Error: ' + res.status + ' ' + res.statusText);\n            showToast('error', `Error al enviar: ${res.status} ${res.statusText}. ${textBody ? 'Respuesta: ' + textBody : ''}`);\n          } else {\n            setStatus('success', 'Enviado correctamente ✅');\n            showToast('success', 'Mensaje enviado con éxito.');\n            // opcional: limpiar formulario\n            // userInput.value = '';\n            // messageInput.value = '';\n            // updatePreview();\n          }\n        } catch (err) {\n          // Falló la conexión (CORS, servidor caído, URL incorrecta, etc.)\n          setStatus('error', 'No se pudo conectar');\n          showToast('error', 'No se pudo conectar con el servidor. ¿Está corriendo en http://localhost:5678? CORS también debe permitir el origen.');\n          console.error('Fetch error:', err);\n        } finally {\n          sendBtn.disabled = false;\n          sendBtn.textContent = 'Enviar mensaje';\n        }\n      });\n    })();\n  </script>\n</body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        32,
+        -32
+      ],
+      "id": "8c1f8430-c347-43de-b632-ebbbdf9e5566",
+      "name": "Respond to Webhook",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "errorMessage": "errorr"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        240,
+        64
+      ],
+      "id": "c24cec85-0633-4929-ab95-7603e8f928a0",
+      "name": "Stop and Error"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Call 'SubWorflow de clasificación'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call 'SubWorflow de clasificación'": {
+      "main": [
+        [
+          {
+            "node": "Call sub-enrutado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call sub-enrutado": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "d711VGvZIJp02MON"
+  },
+  "versionId": "bdb5b321-d992-4543-8f99-c013812e3f9a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bb93d7ebc8a301ed99d10c7fb5d16f7b08b7954450dbaad005179f2a9dd88ba0"
+  },
+  "id": "HkUDWlM414obc8rX",
+  "tags": []
+}
